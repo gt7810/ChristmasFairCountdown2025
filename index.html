@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCHK Christmas Fair Countdown</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the countdown poster container */
+        .poster-container {
+            max-width: 600px;
+            width: 90%;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            border: 8px solid #a0c49a; /* Festive border color */
+            border-radius: 20px;
+            overflow: hidden;
+            background-color: #f7f7f7;
+            position: relative;
+        }
+
+        .poster-image {
+            display: block;
+            width: 100%;
+            height: auto;
+            border-radius: 12px;
+        }
+
+        /* Styling for the custom message when a poster is missing or for special days */
+        .fallback-message {
+            height: 60vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            background: #ffe3e3;
+            color: #d83a3a;
+        }
+        
+        .event-day-message {
+            background: #e6f7ff;
+            color: #007bff;
+        }
+    </style>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary-red': '#D80032',
+                        'christmas-green': '#005533',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen font-sans">
+    <div class="flex-grow flex items-center justify-center p-4">
+        <div id="poster-area" class="poster-container">
+            <!-- Poster will be loaded here by JavaScript -->
+            <div id="loading-indicator" class="p-8 text-center text-gray-500">
+                <svg class="animate-spin h-5 w-5 mr-3 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading countdown...
+            </div>
+        </div>
+    </div>
+    
+    <footer class="text-center p-4 bg-primary-red text-white text-sm">
+        MCHK Christmas Fair 2025 - Event Date: November 29, 2025
+    </footer>
+
+    <script>
+        // --- Configuration ---
+        const TARGET_DATE_STRING = '2025-11-29'; // The date of the MCHK Christmas Fair
+        
+        // FIX: Use the specific folder path and the new .png extension.
+        const POSTER_BASE_PATH = 'Posters/'; 
+        const POSTER_EXTENSION = '.png'; 
+
+        /**
+         * Calculates the number of full days remaining until the target date.
+         */
+        function calculateDaysRemaining(targetDateString) {
+            const targetDate = new Date(targetDateString);
+            targetDate.setHours(0, 0, 0, 0);
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const diffTime = targetDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            return diffDays;
+        }
+
+        /**
+         * Determines the correct poster file name based on the days to display.
+         * FIX: Returns the simple numeric file name (e.g., "10.png").
+         * @param {number} daysToDisplay - The number of days to show on the poster (1 to 10).
+         * @returns {string} The simple numeric file name with extension.
+         */
+        function getPosterFileName(daysToDisplay) {
+            return `${daysToDisplay}${POSTER_EXTENSION}`;
+        }
+
+        /**
+         * Main function to load and display the daily content.
+         */
+        function displayDailyPoster() {
+            const posterArea = document.getElementById('poster-area');
+            
+            // Current Date calculation (Today is November 18, 2025)
+            const daysRemaining = calculateDaysRemaining(TARGET_DATE_STRING);
+            const daysToDisplay = daysRemaining - 1; // 11 days remaining means 10 Days to go poster
+
+            let contentHTML = '';
+
+            if (daysToDisplay >= 1 && daysToDisplay <= 10) {
+                // Case: The 10-day countdown period (Nov 18 to Nov 28)
+                const fileName = getPosterFileName(daysToDisplay);
+                
+                // CRITICAL FIX: Construct the relative path directly using the base path and file name.
+                // Example generated path: "Posters/10.png"
+                const imageSrc = POSTER_BASE_PATH + fileName;
+                
+                contentHTML = `
+                    <img 
+                        src="${imageSrc}" 
+                        alt="${daysToDisplay} Days to Go Poster" 
+                        class="poster-image"
+                        onerror="this.style.display='none'; document.getElementById('error-message').style.display='flex';"
+                    >
+                    <div id="error-message" class="fallback-message hidden rounded-xl p-8">
+                        <h2 class="text-2xl font-bold mb-3">Poster Not Found!</h2>
+                        <p class="text-lg">We are expecting the **${daysToDisplay} Days to go** poster today, but the file could not be loaded.</p>
+                        <p class="mt-4 text-sm text-gray-700">The app looked for: <strong>${imageSrc}</strong>. Please confirm the file is named **${fileName}** inside the **Posters** folder.</p>
+                    </div>
+                `;
+
+            } else if (daysToDisplay > 10) {
+                // Case: Before Nov 18
+                contentHTML = `
+                    <div class="fallback-message event-day-message rounded-xl p-8">
+                        <h2 class="text-2xl font-bold mb-3">Countdown Starts Soon!</h2>
+                        <p class="text-lg">The official daily poster countdown begins on November 18, 2025.</p>
+                        <p class="mt-4 text-sm text-gray-600">(${daysToDisplay + 1} days remaining until November 29th.)</p>
+                    </div>
+                `;
+            } else if (daysToDisplay === 0) {
+                 // Case: November 29th (Event Day)
+                contentHTML = `
+                    <div class="fallback-message event-day-message rounded-xl p-8">
+                        <h2 class="text-4xl font-extrabold text-christmas-green mb-4">🥳 IT'S TODAY! 🥳</h2>
+                        <h3 class="text-3xl font-bold">MCHK CHRISTMAS FAIR 2025</h3>
+                        <p class="text-xl mt-4">See you at the fair!</p>
+                        <p class="text-lg mt-2">Sat, 29<sup>th</sup> November | 11AM - 3PM</p>
+                    </div>
+                `;
+            } else {
+                // Case: After November 29th
+                 contentHTML = `
+                    <div class="fallback-message event-day-message rounded-xl p-8">
+                        <h2 class="text-2xl font-bold mb-3">Event Concluded</h2>
+                        <p class="text-lg">The MCHK Christmas Fair 2025 has successfully concluded. Thank you for participating!</p>
+                    </div>
+                `;
+            }
+
+            // Replace the loading indicator with the actual content
+            posterArea.innerHTML = contentHTML;
+        }
+
+        // Run the function when the page loads
+        window.onload = displayDailyPoster;
+    </script>
+</body>
+</html>

@@ -104,7 +104,6 @@
 
         /**
          * Determines the correct poster file name based on the days to display.
-         * FIX: Returns the simple numeric file name (e.g., "10.png").
          * @param {number} daysToDisplay - The number of days to show on the poster (1 to 10).
          * @returns {string} The simple numeric file name with extension.
          */
@@ -120,7 +119,7 @@
             
             // Current Date calculation (Today is November 18, 2025)
             const daysRemaining = calculateDaysRemaining(TARGET_DATE_STRING);
-            const daysToDisplay = daysRemaining - 1; // 11 days remaining means 10 Days to go poster
+            const daysToDisplay = daysRemaining ; // 10 days remaining means 10 Days to go poster
 
             let contentHTML = '';
 
